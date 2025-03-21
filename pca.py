@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # Step 2: Load and Prepare Your Data
 # Load the eGeMAPs features from CSV
-df = pd.read_csv('egemaps_features.csv', index_col=0)
+df = pd.read_csv('predict_feature.csv', index_col=0)
 
 # Separate features and labels
 X = df.drop('label', axis=1)  # All columns except 'label'
@@ -44,7 +44,7 @@ plt.ylabel('Explained Variance Ratio')
 plt.title('Explained Variance by Principal Components (eGeMAPs Features)')
 plt.legend(loc='best')
 plt.grid()
-plt.savefig('pca_variance_plot.png')
+plt.savefig('pca_test_variance_plot.png')
 plt.show()
 
 # Step 5: Print Component Information
@@ -54,13 +54,13 @@ for i, (ratio, cum_ratio) in enumerate(zip(explained_variance_ratio, cumulative_
 
 # Step 6: Retain Selected Components
 # Re-fit PCA with the selected number of components
-pca_reduced = PCA(n_components=n_components_95)
+pca_reduced = PCA(n_components=32)
 X_pca_reduced = pca_reduced.fit_transform(X_scaled)
 
 # Create DataFrame with reduced PCA components and labels
 pca_df = pd.DataFrame(
     X_pca_reduced,
-    columns=[f'PC{i+1}' for i in range(n_components_95)],
+    columns=[f'PC{i+1}' for i in range(32)],
     index=X.index
 )
 pca_df['label'] = y  # Add back the labels
@@ -78,5 +78,5 @@ plt.xlabel('First Principal Component')
 plt.ylabel('Second Principal Component')
 plt.title('PCA Components 1 vs 2 (Colored by ADHD Label)')
 plt.colorbar(label='ADHD Label')
-plt.savefig('pca_components_plot.png')
+plt.savefig('pca_test_components_plot.png')
 plt.show()

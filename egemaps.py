@@ -65,17 +65,17 @@ def extract_egemaps(audio_file):
     features = smile.process_file(audio_file)
     return features.values[0]
 
-def get_label(filename):
-    """
-    Get label based on filename (1 for ADHD, 0 for non-ADHD)
+# def get_label(filename):
+#     """
+#     Get label based on filename (1 for ADHD, 0 for non-ADHD)
     
-    Args:
-        filename (str): Name of the audio file
+#     Args:
+#         filename (str): Name of the audio file
         
-    Returns:
-        int: Label (1 for ADHD, 0 for non-ADHD)
-    """
-    return 1 if 'adhd' in filename.lower() else 0
+#     Returns:
+#         int: Label (1 for ADHD, 0 for non-ADHD)
+#     """
+#     return 1 if 'adhd' in filename.lower() else 0
 
 def process_audio_directory(input_dir, output_file):
     """
@@ -93,7 +93,7 @@ def process_audio_directory(input_dir, output_file):
     
     # Initialize lists to store features, labels, and file names
     all_features = []
-    all_labels = []
+    # all_labels = []
     file_names = []
     
     # Process each audio file
@@ -104,10 +104,10 @@ def process_audio_directory(input_dir, output_file):
         try:
             # Extract eGeMAPs features
             features = extract_egemaps(file_path)
-            label = get_label(audio_file)
+            # label = get_label(audio_file)
             
             all_features.append(features)
-            all_labels.append(label)
+            # all_labels.append(label)
             file_names.append(audio_file)
             print(f"Successfully processed: {audio_file}")
         except Exception as e:
@@ -123,23 +123,22 @@ def process_audio_directory(input_dir, output_file):
     df = pd.DataFrame(all_features, index=file_names, columns=feature_names)
     
     # Add label column to the DataFrame
-    df['label'] = all_labels
+    # df['label'] = all_labels
     
     # Save features to CSV
     df.to_csv(output_file)
     print(f"\nFeatures saved to: {output_file}")
     print("\nDataset Statistics:")
     print(f"Total samples: {len(df)}")
-    print(f"ADHD samples: {sum(all_labels)}")
-    print(f"Non-ADHD samples: {len(all_labels) - sum(all_labels)}")
+    # print(f"ADHD samples: {sum(all_labels)}")
+    # print(f"Non-ADHD samples: {len(all_labels) - sum(all_labels)}")
     
-    return df, all_labels
+    return df
 
 def main():
     # Specify your directories and parameters
-    input_dir = r"dataset\train_16k"  # Directory containing audio files
-    features_file = "egemaps_features.csv"  # Where to save the features
-    complete_dataset_file = "complete_dataset.csv"  # Where to save the complete dataset# Number of PCA components
+    input_dir = r"dataset\predict_16k"  # Directory containing audio files
+    features_file = "predict_feature.csv"  # Where to save the features
     
     try:
         # Extract eGeMAPs features and get labels
@@ -150,4 +149,4 @@ def main():
         print(f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
-    main() 
+    main()

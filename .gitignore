@@ -16,6 +16,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
+env/
 build/
 develop-eggs/
 dist/
@@ -50,3 +51,10 @@ wheels/
 *.csv
 *.png
 !requirements.txt
+
+# Project specific
+*.pth
+*.mp3
+*.wav
+*.jpg
+*.jpeg

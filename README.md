@@ -1,69 +1,88 @@
-# ADHD Voice Analysis Project
+# ADHD Voice Analysis
 
-This project analyzes voice characteristics of ADHD and non-ADHD individuals using eGeMAPs features and Principal Component Analysis (PCA).
+This project analyzes voice characteristics to detect ADHD using machine learning techniques. It processes audio files, extracts eGeMAPs features, and uses a neural network for classification.
+
+## Features
+
+- Audio file processing and feature extraction
+- eGeMAPs feature extraction using OpenSMILE
+- PCA dimensionality reduction
+- Neural network classification using PyTorch
+- Support for both training and prediction
 
 ## Project Structure
 
 ```
 .
-├── dataset/               # Audio dataset (not included in repository)
-├── egemaps_pca.py        # Main script for eGeMAPs feature extraction and PCA
-├── pca.py                # PCA analysis and visualization
-├── resample_audio.py     # Audio resampling script
-└── requirements.txt      # Project dependencies
+├── dataset/              # Directory for audio files (not included in repo)
+├── neural_network.py     # Neural network model implementation
+├── predict.py           # Script for making predictions
+├── create_train_test_data.py  # Script for data preparation
+├── requirements.txt     # Project dependencies
+└── README.md           # This file
 ```
 
 ## Setup
 
-1. Create a virtual environment:
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/adhd-voice-analysis.git
+cd adhd-voice-analysis
+```
+
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install dependencies:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Place your audio dataset in the `dataset` directory:
-   - ADHD samples should have "adhd" in their filename
-   - Non-ADHD samples should not have "adhd" in their filename
-
 ## Usage
 
-1. Resample audio files to 16kHz:
+### Data Preparation
+
+1. Place your audio files in the `dataset/adhd` directory
+2. Run the data preparation script:
 ```bash
-python resample_audio.py
+python create_train_test_data.py
 ```
 
-2. Extract eGeMAPs features:
+### Training
+
+1. Run the neural network training script:
 ```bash
-python egemaps_pca.py
+python neural_network.py
 ```
 
-3. Perform PCA analysis:
+### Prediction
+
+1. Place new audio files in the appropriate directory
+2. Run the prediction script:
 ```bash
-python pca.py
+python predict.py
 ```
-
-## Output Files
-
-- `egemaps_features.csv`: Raw eGeMAPs features
-- `pca_results_reduced.csv`: PCA-transformed features
-- `pca_variance_plot.png`: Explained variance plot
-- `pca_components_plot.png`: PCA components visualization
 
 ## Dependencies
 
+- Python 3.8+
+- PyTorch
 - librosa
 - soundfile
 - opensmile
-- scikit-learn
-- numpy
 - pandas
+- numpy
+- scikit-learn
 - matplotlib
+- seaborn
 
 ## License
 
-[Your chosen license] 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. 
