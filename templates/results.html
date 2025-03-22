@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Analysis Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis-style.css') }}">
+
+</head>
+<body>
+    <ul>
+        <!--
+            <li>Fundamental Frequency (F0) Average: {{ features['F0 Average'] }}</li>
+            <li>Harmonics: {{ features['Harmonics'] }}</li>
+            <li>Formants: {{ features['Formants'] }}</li>
+            <li>Intensity Average: {{ features['Intensity Average'] }}</li>
+            <li>Duration: {{ features['Duration'] }}</li>
+            <li>Spectral Centroid: {{ features['Spectral Centroid'] }}</li>
+            <li>Spectral Bandwidth: {{ features['Spectral Bandwidth'] }}</li>
+            <li>Speech Rate: {{ features['Speech Rate'] }}</li>
+            <li>Jitter: {{ features['Jitter'] }}</li>
+            <li>Shimmer: {{ features['Shimmer'] }}</li>
+        -->
+    </ul>
+    <div class="container">
+        <h1>Analysis Results</h1>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>F0 Average</h3>
+                <div class="metric-value" id="f0">220 Hz</div>
+                <canvas class="metric-chart"></canvas>
+            </div>
+            <div class="metric-card">
+                <h3>Harmonics</h3>
+                <div class="metric-value" id="harmonics">1.5</div>
+                <input id="harmonics_chart_value" value={{ features['Harmonics'] }} hidden/>
+                <canvas id="harmonics_chart" class="metric-chart"></canvas>
+            </div>
+            <div class="metric-card">
+                <h3>Formants</h3>
+                <div class="metric-value" id="formants">3.2</div>
+                <canvas class="metric-chart"></canvas>
+            </div>
+            <div class="metric-card">
+                <h3>Intensity Average</h3>
+                <div class="metric-value" id="intensity">75 dB</div>
+                <canvas class="metric-chart"></canvas>
+            </div>
+            <div class="metric-card">
+                <h3>Duration</h3>
+                <div class="metric-value" id="duration">1:30</div>
+            </div>
+            <div class="metric-card">
+                <h3>Spectral Centroid</h3>
+                <div class="metric-value" id="centroid">2000 Hz</div>
+                <canvas class="metric-chart"></canvas>
+            </div>
+            <div class="metric-card">
+                <h3>Spectral Bandwidth</h3>
+                <div class="metric-value" id="bandwidth">1500 Hz</div>
+                <canvas class="metric-chart"></canvas>
+            </div>
+            <div class="metric-card">
+                <h3>Speech Rate</h3>
+                <div class="metric-value" id="speech-rate">3.5 w/s</div>
+            </div>
+            <div class="metric-card">
+                <h3>Jitter</h3>
+                <div class="metric-value" id="jitter">0.5%</div>
+                <canvas class="metric-chart"></canvas>
+            </div>
+            <div class="metric-card">
+                <h3>Shimmer</h3>
+                <div class="metric-value" id="shimmer"> {{ features['Shimmer'] }}</div>
+                <canvas class="metric-chart"></canvas>
+            </div>
+        </div>
+
+        <a href="{{ url_for('home') }}" class="back-btn">
+            Record Another Voice
+        </a>
+    </div>
+    <script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+</body>
+</html>

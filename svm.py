@@ -10,10 +10,10 @@ import joblib
 
 def load_and_prepare_data():
     """
-    Load eGeMAPs features and prepare them for training
+    Load PCA-reduced data and prepare it for training
     """
-    # Load the eGeMAPs features
-    df = pd.read_csv('egemaps_features.csv', index_col=0)
+    # Load the PCA-reduced dataset
+    df = pd.read_csv('train_feature.csv', index_col=0)
     
     # Separate features and labels
     X = df.drop('label', axis=1)
@@ -103,4 +103,4 @@ def main():
     print("Scaler saved as 'scaler.joblib'")
 
 if __name__ == "__main__":
-    main()
+    main() 

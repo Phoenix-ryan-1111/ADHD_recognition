@@ -1,7 +1,8 @@
 #dependencies
 /dataset
 /venv
-
+/uploads
+/processed
 # Dataset directory
 dataset/
 

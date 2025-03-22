@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Voice Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel='icon' href="{{ url_for('static', filename='img/logo.png') }}">
+</head>
+<body>
+    <!-- {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for msg in messages %}
+                <li>{{ msg }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %} -->
+    <div class="container">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo" width="30" class="logo">
+        <h1>Voice Analysis</h1>
+        
+        <div class="progress-container">
+            <div class="progress-circles">
+                <div class="progress-circle">
+                    <svg>
+                        <circle class="bg" cx="100" cy="100" r="90"></circle>
+                        <circle class="progress" cx="100" cy="100" r="90"></circle>
+                    </svg>
+                    <div class="percentage">0%</div>
+                </div>
+            </div>
+            <div class="timer">00:00</div>
+        </div>
+
+        <div class="upload-container">
+            <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data" id="uploadForm">  
+                <div class="file-upload">  
+                    <input type="file" id="file_input" name="file" accept=".mp3" required>  
+                    <button type="button" id="uploadButton" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Audio
+                    </button>  
+                    <span id="fileName" class="file-name">No file chosen</span>  
+                </div>  
+                <div class="button-group">
+                    <button type="submit" id="analysisButton" class="btn btn-success" disabled>
+                        <i class="fas fa-play"></i> Analyze Voice
+                    </button>
+                    <button type="button" id="resultButton" class="btn btn-info" style="display: none;">
+                        <i class="fas fa-chart-bar"></i> View Results
+                    </button>
+                </div>
+            </form>  
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="results-portal" id="resultsPortal">
+        <h2>Analysis Results</h2>
+        <div class="results-content" id="resultsContent">
+            <!-- Results will be inserted here -->
+        </div>
+        <button class="close-results" onclick="closeResults()">Close</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+</body>
+</html>

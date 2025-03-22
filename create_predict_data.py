@@ -9,6 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import seaborn as sns
+import shutil
 
 def split_audio(input_file, output_dir, segment_length_seconds=60):
     """
@@ -119,7 +120,7 @@ def extract_egemaps(audio_file):
     features = smile.process_file(audio_file)
     return features.values[0]
 
-def process_audio_files(input_file, output_dir, segment_length=60):
+def process_audio_files(input_file, output_dir=r"processed", segment_length=60):
     """
     Process audio file: split, resample, and extract features
     
@@ -131,6 +132,16 @@ def process_audio_files(input_file, output_dir, segment_length=60):
     # Create necessary directories
     split_dir = os.path.join(output_dir, 'split')
     resampled_dir = os.path.join(output_dir, 'resampled')
+    
+    # Delete existing directories if they exist
+    if os.path.exists(split_dir):
+        print(f"Deleting existing split directory: {split_dir}")
+        shutil.rmtree(split_dir)
+    if os.path.exists(resampled_dir):
+        print(f"Deleting existing resampled directory: {resampled_dir}")
+        shutil.rmtree(resampled_dir)
+    
+    # Create fresh directories
     os.makedirs(split_dir, exist_ok=True)
     os.makedirs(resampled_dir, exist_ok=True)
     
@@ -168,138 +179,140 @@ def process_audio_files(input_file, output_dir, segment_length=60):
     
     # Save features
     features_file = os.path.join(output_dir, 'features.csv')
+    if os.path.exists(features_file):
+        print(f"Deleting existing features file: {features_file}")
+        os.remove(features_file)
     df.to_csv(features_file)
     print(f"\nFeatures saved to: {features_file}")
     
     return df
 
-def perform_pca(features_df, n_components=None):
-    """
-    Perform PCA on the features with manual input of number of components
+# # def perform_pca(features_df, n_components=3):
+#     """
+#     Perform PCA on the features with manual input of number of components
     
-    Args:
-        features_df (pd.DataFrame): DataFrame containing features
-        n_components (int, optional): Number of components to keep. If None, will ask for input.
+#     Args:
+#         features_df (pd.DataFrame): DataFrame containing features
+#         n_components (int, optional): Number of components to keep. If None, will ask for input.
         
-    Returns:
-        tuple: (PCA object, transformed features, explained variance ratio)
-    """
-    # Standardize the features
-    scaler = StandardScaler()
-    scaled_features = scaler.fit_transform(features_df)
+#     Returns:
+#         tuple: (PCA object, transformed features, explained variance ratio)
+#     """
+#     # Standardize the features
+#     scaler = StandardScaler()
+#     scaled_features = scaler.fit_transform(features_df)
     
-    # If n_components is not provided, ask for input
-    if n_components is None:
-        max_components = min(features_df.shape[0], features_df.shape[1])
-        print(f"\nMaximum possible components: {max_components}")
-        while True:
-            try:
-                n_components = 32
-                # int(input("Enter the number of components to keep: "))
-                if 1 <= n_components <= max_components:
-                    break
-                else:
-                    print(f"Please enter a number between 1 and {max_components}")
-            except ValueError:
-                print("Please enter a valid number")
+#     # If n_components is not provided, ask for input
+#     if n_components is None:
+#         max_components = min(features_df.shape[0], features_df.shape[1])
+#         print(f"\nMaximum possible components: {max_components}")
+#         while True:
+#             try:
+#                 n_components = 3
+#                 # int(input("Enter the number of components to keep: "))
+#                 if 1 <= n_components <= max_components:
+#                     break
+#                 else:
+#                     print(f"Please enter a number between 1 and {max_components}")
+#             except ValueError:
+#                 print("Please enter a valid number")
     
-    # Perform PCA
-    pca = PCA(n_components=n_components)
-    pca_result = pca.fit_transform(scaled_features)
+#     # Perform PCA
+#     pca = PCA(n_components=n_components)
+#     pca_result = pca.fit_transform(scaled_features)
     
-    # Print explained variance information
-    print("\nPCA Results:")
-    print(f"Number of components: {n_components}")
-    print("\nExplained variance ratio for each component:")
-    for i, var_ratio in enumerate(pca.explained_variance_ratio_, 1):
-        print(f"PC{i}: {var_ratio:.4f} ({var_ratio*100:.2f}%)")
+#     # Print explained variance information
+#     print("\nPCA Results:")
+#     print(f"Number of components: {n_components}")
+#     print("\nExplained variance ratio for each component:")
+#     for i, var_ratio in enumerate(pca.explained_variance_ratio_, 1):
+#         print(f"PC{i}: {var_ratio:.4f} ({var_ratio*100:.2f}%)")
     
-    print(f"\nCumulative explained variance: {sum(pca.explained_variance_ratio_):.4f} ({sum(pca.explained_variance_ratio_)*100:.2f}%)")
+#     print(f"\nCumulative explained variance: {sum(pca.explained_variance_ratio_):.4f} ({sum(pca.explained_variance_ratio_)*100:.2f}%)")
     
-    return pca, pca_result, pca.explained_variance_ratio_
+#     return pca, pca_result, pca.explained_variance_ratio_
 
-def plot_pca_results(pca_result, explained_variance_ratio, output_dir):
-    """
-    Plot PCA results including explained variance and component visualization
+# # def plot_pca_results(pca_result, explained_variance_ratio, output_dir):
+#     """
+#     Plot PCA results including explained variance and component visualization
     
-    Args:
-        pca_result (np.ndarray): PCA transformed features
-        explained_variance_ratio (np.ndarray): Explained variance ratio for each component
-        output_dir (str): Directory to save plots
-    """
-    # Create plots directory if it doesn't exist
-    plots_dir = os.path.join(output_dir, 'plots')
-    os.makedirs(plots_dir, exist_ok=True)
+#     Args:
+#         pca_result (np.ndarray): PCA transformed features
+#         explained_variance_ratio (np.ndarray): Explained variance ratio for each component
+#         output_dir (str): Directory to save plots
+#     """
+#     # Create plots directory if it doesn't exist
+#     plots_dir = os.path.join(output_dir, 'plots')
+#     os.makedirs(plots_dir, exist_ok=True)
     
-    # Plot 1: Explained variance ratio
-    plt.figure(figsize=(10, 6))
-    plt.bar(range(1, len(explained_variance_ratio) + 1), explained_variance_ratio)
-    plt.title('Explained Variance Ratio by Component')
-    plt.xlabel('Principal Component')
-    plt.ylabel('Explained Variance Ratio')
-    plt.savefig(os.path.join(plots_dir, 'explained_predict_variance.png'))
-    plt.close()
+#     # Plot 1: Explained variance ratio
+#     plt.figure(figsize=(10, 6))
+#     plt.bar(range(1, len(explained_variance_ratio) + 1), explained_variance_ratio)
+#     plt.title('Explained Variance Ratio by Component')
+#     plt.xlabel('Principal Component')
+#     plt.ylabel('Explained Variance Ratio')
+#     plt.savefig(os.path.join(plots_dir, 'explained_predict_variance.png'))
+#     plt.close()
     
-    # Plot 2: Cumulative explained variance
-    plt.figure(figsize=(10, 6))
-    cumulative_variance = np.cumsum(explained_variance_ratio)
-    plt.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, 'bo-')
-    plt.title('Cumulative Explained Variance')
-    plt.xlabel('Number of Components')
-    plt.ylabel('Cumulative Explained Variance')
-    plt.grid(True)
-    plt.savefig(os.path.join(plots_dir, 'cumulative_predict_variance.png'))
-    plt.close()
+#     # Plot 2: Cumulative explained variance
+#     plt.figure(figsize=(10, 6))
+#     cumulative_variance = np.cumsum(explained_variance_ratio)
+#     plt.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, 'bo-')
+#     plt.title('Cumulative Explained Variance')
+#     plt.xlabel('Number of Components')
+#     plt.ylabel('Cumulative Explained Variance')
+#     plt.grid(True)
+#     plt.savefig(os.path.join(plots_dir, 'cumulative_predict_variance.png'))
+#     plt.close()
     
-    # Plot 3: First two components scatter plot (if at least 2 components)
-    if pca_result.shape[1] >= 2:
-        plt.figure(figsize=(10, 6))
-        plt.scatter(pca_result[:, 0], pca_result[:, 1])
-        plt.title('First Two Principal Components')
-        plt.xlabel(f'PC1 ({explained_variance_ratio[0]*100:.1f}% variance)')
-        plt.ylabel(f'PC2 ({explained_variance_ratio[1]*100:.1f}% variance)')
-        plt.grid(True)
-        plt.savefig(os.path.join(plots_dir, 'pca_scatter.png'))
-        plt.close()
+#     # Plot 3: First two components scatter plot (if at least 2 components)
+#     if pca_result.shape[1] >= 2:
+#         plt.figure(figsize=(10, 6))
+#         plt.scatter(pca_result[:, 0], pca_result[:, 1])
+#         plt.title('First Two Principal Components')
+#         plt.xlabel(f'PC1 ({explained_variance_ratio[0]*100:.1f}% variance)')
+#         plt.ylabel(f'PC2 ({explained_variance_ratio[1]*100:.1f}% variance)')
+#         plt.grid(True)
+#         plt.savefig(os.path.join(plots_dir, 'pca_scatter.png'))
+#         plt.close()
 
-def main():
-    # Specify your input and output paths
-    input_file = r"dataset\test.mp3"  # Change this to your input file path
-    output_dir = r""  # Change this to your desired output directory
-    segment_length = 60  # Length of each segment in seconds
-    
-    try:
-        # Process audio files
-        print("\nProcessing audio files...")
-        features_df = process_audio_files(input_file, output_dir, segment_length)
+# def main():
+#     # Specify your input and output paths
+#     input_file = r"dataset\predict_non_ADHD.mp3"  # Change this to your input file path
+#     output_dir = r"processed"  # Change this to your desired output directory
+#     segment_length = 60  # Length of each segment in seconds
+#     try:
+#         # Process audio files
+#         print("\nProcessing audio files...")
+#         features_df = process_audio_files(input_file, output_dir, segment_length)
         
-        print("\nProcessing completed successfully!")
-        print(f"Total segments processed: {len(features_df)}")
-        print(f"Number of features extracted: {len(features_df.columns)}")
+#         print("\nProcessing completed successfully!")
+#         print(f"Total segments processed: {len(features_df)}")
+#         print(f"Number of features extracted: {len(features_df.columns)}")
         
-        # Perform PCA
-        print("\nPerforming PCA analysis...")
-        pca, pca_result, explained_variance_ratio = perform_pca(features_df)
+#         # Perform PCA
+#         # print("\nPerforming PCA analysis...")
+#         # pca, pca_result, explained_variance_ratio = perform_pca(features_df)
         
-        # Create PCA results DataFrame
-        pca_df = pd.DataFrame(
-            pca_result,
-            columns=[f'PC{i+1}' for i in range(pca_result.shape[1])],
-            index=features_df.index
-        )
+#         # # Create PCA results DataFrame
+#         # pca_df = pd.DataFrame(
+#         #     pca_result,
+#         #     columns=[f'PC{i+1}' for i in range(pca_result.shape[1])],
+#         #     index=features_df.index
+#         # )
         
-        # Save PCA results
-        pca_file = os.path.join(output_dir, 'pca_predict_results.csv')
-        pca_df.to_csv(pca_file)
-        print(f"\nPCA results saved to: {pca_file}")
+#         # # Save PCA results
+#         # pca_file = os.path.join(output_dir, 'pca_predict_results.csv')
+#         # pca_df.to_csv(pca_file)
+#         # print(f"\nPCA results saved to: {pca_file}")
         
-        # Plot PCA results
-        print("\nGenerating PCA plots...")
-        plot_pca_results(pca_result, explained_variance_ratio, output_dir)
-        print(f"Plots saved to: {os.path.join(output_dir, 'plots')}")
+#         # # Plot PCA results
+#         # print("\nGenerating PCA plots...")
+#         # plot_pca_results(pca_result, explained_variance_ratio, output_dir)
+#         # print(f"Plots saved to: {os.path.join(output_dir, 'plots')}")
         
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
+#     except Exception as e:
+#         print(f"An error occurred: {str(e)}")
 
-if __name__ == "__main__":
-    main() 
+# if __name__ == "__main__":
+#     main() 

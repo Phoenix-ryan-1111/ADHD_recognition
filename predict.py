@@ -1,78 +1,71 @@
-import pandas as pd
-import numpy as np
 import joblib
-
-def load_and_prepare_data(file_path):
+from create_predict_data import process_audio_files
+def predict_adhd(features_df):
     """
-    Load and prepare new data for prediction
-    """
-    # Load the new features
-    df = pd.read_csv(file_path, index_col=0)
-    
-    # Load the scaler
-    scaler = joblib.load('scaler.joblib')
-    
-    # Scale the features
-    X_scaled = scaler.transform(df)
-    
-    return X_scaled, df.index
-
-def predict(model, data):
-    """
-    Make predictions using the trained SVM model
+    Predict ADHD from features DataFrame
     
     Args:
-        model: The trained SVM model
-        data: Scaled input data
+        features_df (pd.DataFrame): DataFrame containing features
+        
+    Returns:
+        dict: Dictionary containing prediction results
+            {
+                'prediction': 'ADHD' or 'Non-ADHD',
+                'probability': float (0-1),
+                'percentage': float (0-100),
+                'message': str
+            }
     """
-    # Make predictions
-    predictions = model.predict(data)
-    probabilities = model.predict_proba(data)
-    
-    return predictions, probabilities[:, 1]  # Return probability of positive class
+    try:
+        # Load the trained model and scaler
+        model = joblib.load('adhd_classifier.joblib')
+        scaler = joblib.load('scaler.joblib')
+        
+        # Scale the features
+        X_scaled = scaler.transform(features_df)
+        
+        # Make predictions
+        predictions = model.predict(X_scaled)
+        probabilities = model.predict_proba(X_scaled)
+        print(probabilities)
+        # Calculate average probability for ADHD
+        avg_probability = probabilities[:, 1].mean()
+        
+        # Determine final prediction
+        final_prediction = 1 if avg_probability >= 0.5 else 0
+        
+        # Prepare result
+        result = {
+            'success':True,
+            'prediction': f"prediction: {'ADHD' if final_prediction == 1 else 'Non-ADHD'}",
+            'probability': f"Probability of ADHD: {avg_probability:.2%}",
+            'percentage': float(avg_probability * 100),
+        }
+        
+        return result
+        
+    except Exception as e:
+        return {
+            'prediction': 'Error',
+            'probability': 0.0,
+            'percentage': 0.0,
+            'message': f'Error processing features: {str(e)}'
+        }
 
 def main():
-    # Load the trained model
-    print("Loading trained SVM model...")
-    model = joblib.load('adhd_classifier.joblib')
+    # Example usage
+    # Process audio file
+    features_df = process_audio_files(
+        input_file="dataset/predict_non_ADHD.mp3"
+    )
+    # Make prediction
+    result = predict_adhd(features_df)
     
-    # Load and prepare new data
-    print("Loading new features...")
-    X_scaled, file_names = load_and_prepare_data('features.csv')
-    
-    # Print data shape for debugging
-    print(f"Input data shape: {X_scaled.shape}")
-    
-    # Make predictions
-    print("Making predictions...")
-    predictions, probabilities = predict(model, X_scaled)
-    
-    # Create results DataFrame
-    results_df = pd.DataFrame({
-        'File': file_names,
-        'Prediction': predictions,
-        'Probability': probabilities
-    })
-    
-    # Add interpretation
-    results_df['Interpretation'] = results_df['Prediction'].map({1: 'ADHD', 0: 'Non-ADHD'})
-    
-    # Save results
-    results_df.to_csv('prediction_results.csv')
-    print("\nResults saved to 'prediction_results.csv'")
-    
-    # Print summary
-    print("\nPrediction Summary:")
-    print(f"Total samples: {len(predictions)}")
-    print(f"ADHD predictions: {sum(predictions)}")
-    print(f"Non-ADHD predictions: {len(predictions) - sum(predictions)}")
-    
-    # Print detailed results
-    print("\nDetailed Results:")
-    for _, row in results_df.iterrows():
-        print(f"\nFile: {row['File']}")
-        print(f"Prediction: {row['Interpretation']}")
-        print(f"Probability: {row['Probability']:.4f}")
+    print("\nPrediction Results:")
+    print(f"Prediction: {result['prediction']}")
+    print(f"Probability: {result['probability']:.4f}")
+    print(f"Percentage: {result['percentage']:.2f}%")
+    print(f"Message: {result['message']}")
 
 if __name__ == "__main__":
     main() 
