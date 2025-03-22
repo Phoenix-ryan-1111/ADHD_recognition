@@ -194,7 +194,8 @@ def perform_pca(features_df, n_components=None):
         print(f"\nMaximum possible components: {max_components}")
         while True:
             try:
-                n_components = int(input("Enter the number of components to keep: "))
+                n_components = 32
+                # int(input("Enter the number of components to keep: "))
                 if 1 <= n_components <= max_components:
                     break
                 else:
@@ -263,8 +264,8 @@ def plot_pca_results(pca_result, explained_variance_ratio, output_dir):
 
 def main():
     # Specify your input and output paths
-    input_file = r"dataset\predict.mp3"  # Change this to your input file path
-    output_dir = r"dataset\processed"  # Change this to your desired output directory
+    input_file = r"dataset\test.mp3"  # Change this to your input file path
+    output_dir = r""  # Change this to your desired output directory
     segment_length = 60  # Length of each segment in seconds
     
     try:
