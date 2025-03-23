@@ -14,11 +14,11 @@ app.config['MAX_CONTENT_PATH'] = 255  # Maximum length of file path
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-def send_progress_update(stage, percentage):
-    return f"data: {json.dumps({'type': 'progress', 'stage': stage, 'percentage': percentage})}\n\n"
+def send_estimate_time(estimate_time):
+    return f"data: {json.dumps({'type': 'estimate', 'estimate_time': estimate_time})}\n\n"
 
-def send_result(result):
-    return f"data: {json.dumps({'type': 'result', 'result': result})}\n\n"
+def send_result(result,sucess):
+    return f"data: {json.dumps({'type': 'result','sucess':sucess, 'result': result})}\n\n"
 
 @app.route('/')
 def index():
@@ -29,14 +29,14 @@ def upload_file():
     try:
         if 'file' not in request.files:
             return Response(
-                send_result({'success': False, 'message': 'No file part'}),
+                send_result({'success': False, 'result': 'No file part'}),
                 mimetype='text/event-stream'
             )
         
         file = request.files['file']
         if file.filename == '':
             return Response(
-                send_result({'success': False, 'message': 'No selected file'}),
+                send_result({'success': False, 'result': 'No selected file'}),
                 mimetype='text/event-stream'
             )
         
@@ -44,7 +44,7 @@ def upload_file():
         allowed_extensions = {'mp3', 'wav'}
         if not '.' in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
             return Response(
-                send_result({'success': False, 'message': 'Invalid file type. Only MP3 and WAV files are allowed.'}),
+                send_result({'success': False, 'result': 'Invalid file type. Only MP3 and WAV files are allowed.'}),
                 mimetype='text/event-stream'
             )
         
@@ -53,7 +53,7 @@ def upload_file():
         file.seek(0)  # Reset file pointer
         if file_size > app.config['MAX_CONTENT_LENGTH']:
             return Response(
-                send_result({'success': False, 'message': f'File too large. Maximum size is {app.config["MAX_CONTENT_LENGTH"] // (1024*1024)}MB'}),
+                send_result({'success': False, 'result': f'File too large. Maximum size is {app.config["MAX_CONTENT_LENGTH"] // (1024*1024)}MB'}),
                 mimetype='text/event-stream'
             )
         
@@ -71,29 +71,15 @@ def upload_file():
         
         def generate():
             try:
-                # Send upload progress
-                yield send_progress_update('upload', 20)
-                time.sleep(1)
-                
+                estimate_time = 2*(create_predict_data.split_number(filepath) - 1) if create_predict_data.split_number(filepath)>=2 else 3
+                yield send_estimate_time(estimate_time)
                 # Process audio file
-                yield send_progress_update('splitting', 30)
                 features_df = create_predict_data.process_audio_files(filepath)
-                time.sleep(2)
-                
-                yield send_progress_update('resampling', 50)
-                time.sleep(2)
-                
-                yield send_progress_update('feature_extraction', 70)
-                time.sleep(2)
-                
-                # Make prediction
-                yield send_progress_update('analysis', 90)
-                time.sleep(1)
+
                 result = predict.predict_adhd(features_df)
                 print(result)
-                
-                # Send final result
-                yield send_result(result)
+
+                yield send_result(result,True)
                 
             except Exception as e:
                 yield send_result({

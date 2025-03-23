@@ -16,9 +16,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let processingStartTime;
     let timerInterval;
     let analysisResult = null;
+    let progressInterval;
+    let resultsTimeout;
     
     // Update progress circle
-    function updateProgress(percentage, stage) {
+    function updateProgress(percentage) {
         const radius = progressCircle.r.baseVal.value;
         const circumference = radius * 2 * Math.PI;
         const offset = circumference - (percentage / 100) * circumference;
@@ -26,28 +28,34 @@ document.addEventListener('DOMContentLoaded', function() {
         progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
         progressCircle.style.strokeDashoffset = offset;
         percentageText.textContent = `${Math.round(percentage)}%`;
-        
-        // Update progress circle color based on stage
-        switch(stage) {
-            case 'upload':
-                progressCircle.style.stroke = '#4CAF50';
-                break;
-            case 'splitting':
-                progressCircle.style.stroke = '#4CAF50';
-                break;
-            case 'resampling':
-                progressCircle.style.stroke = '#4CAF50';
-                break;
-            case 'feature_extraction':
-                progressCircle.style.stroke = '#4CAF50';
-                break;
-            case 'analysis':
-                progressCircle.style.stroke = '#4CAF50';
-                break;
-            case 'complete':
-                progressCircle.style.stroke = '#4CAF50';
-                break;
+
+        // Show results portal when progress reaches 100%
+        if (percentage >= 100 && analysisResult) {
+            clearTimeout(resultsTimeout);
+            resultsTimeout = setTimeout(() => {
+                showResults(analysisResult);
+            }, 1000); // 1 second delay
         }
+    }
+    
+    // Smooth progress animation
+    function startProgressAnimation(estimateTime) {
+        console.log(estimateTime)
+        let currentProgress = 0;
+        const targetProgress = 90; // We'll go up to 90% during processing
+        const totalSteps = estimateTime * 100; // Convert seconds to steps
+        const stepSize = targetProgress / totalSteps;
+        const stepInterval = 10; // Update every 10ms
+        
+        clearInterval(progressInterval);
+        progressInterval = setInterval(() => {
+            currentProgress += stepSize;
+            if (currentProgress >= targetProgress) {
+                currentProgress = targetProgress;
+                clearInterval(progressInterval);
+            }
+            updateProgress(currentProgress);
+        }, stepInterval);
     }
     
     // Update timer
@@ -134,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('file', fileInput.files[0]);
         
         // Reset UI
-        updateProgress(0, 'upload');
+        updateProgress(0);
         startTimer();
         analysisButton.disabled = true;
         uploadButton.disabled = true;
@@ -146,9 +154,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 body: formData
             });
+
             // Handle server-sent events for progress updates
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+            
             while (true) {
                 const {value, done} = await reader.read();
                 if (done) break;
@@ -159,14 +169,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
                         const data = JSON.parse(line.slice(6));
-                        console.log(data.stage)
-                        if (data.type === 'progress') {
-                            updateProgress(data.percentage, data.stage);
+                        
+                        if (data.type === 'estimate') {
+                            // Start smooth progress animation based on estimate time
+                            startProgressAnimation(data.estimate_time);
                         } else if (data.type === 'result') {
-                            console.log(data.result)
+                            clearInterval(progressInterval);
                             analysisResult = data.result;
                             resultButton.style.display = 'block';
-                            updateProgress(100, 'complete');
+                            updateProgress(100);
                             stopTimer();
                         }
                     }
@@ -174,11 +185,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
         } catch (error) {
+            clearInterval(progressInterval);
             analysisResult = {
                 success: false,
                 message: 'Error processing file: ' + error.message
             };
             resultButton.style.display = 'block';
+            updateProgress(100);
         } finally {
             // Reset UI
             analysisButton.disabled = false;

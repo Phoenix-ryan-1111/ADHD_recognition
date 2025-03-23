@@ -11,6 +11,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import shutil
 
+def split_number(input_file,segment_length_seconds=60):
+    y,sr = librosa.load(input_file)
+    segment_length_samples = int(segment_length_seconds * sr)
+    total_segments = len(y) // segment_length_samples + (1 if len(y) % segment_length_samples != 0 else 0)
+    return total_segments
+
 def split_audio(input_file, output_dir, segment_length_seconds=60):
     """
     Split an audio file into segments of specified length

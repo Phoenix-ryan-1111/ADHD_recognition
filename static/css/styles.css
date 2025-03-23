@@ -335,7 +335,7 @@ h1 {
 }
 
 .btn:disabled {
-    background-color: #cccccc;
+    background-color:rgb(99, 96, 96);
     cursor: not-allowed;
 }
 
