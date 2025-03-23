@@ -18,6 +18,38 @@ document.addEventListener('DOMContentLoaded', function() {
     let analysisResult = null;
     let progressInterval;
     let resultsTimeout;
+    let currentFileName = ''; // Store current file name
+    
+    // Reset all UI elements
+    function resetUI() {
+        // Reset progress circle
+        updateProgress(0);
+        
+        // Reset timer
+        stopTimer();
+        timerElement.textContent = '00:00';
+        
+        // Reset buttons
+        analysisButton.disabled = true;
+        resultButton.style.display = 'none';
+        
+        // Reset file input and name
+        fileInput.value = '';
+        fileName.textContent = 'No file chosen';
+        currentFileName = '';
+        
+        // Clear any existing results
+        resultsPortal.style.display = 'none';
+        overlay.style.display = 'none';
+        
+        // Clear any existing timeouts and intervals
+        clearTimeout(resultsTimeout);
+        clearInterval(progressInterval);
+        clearInterval(timerInterval);
+        
+        // Reset result data
+        analysisResult = null;
+    }
     
     // Update progress circle
     function updateProgress(percentage) {
@@ -42,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function startProgressAnimation(estimateTime) {
         console.log(estimateTime)
         let currentProgress = 0;
-        const targetProgress = 90; // We'll go up to 90% during processing
+        const targetProgress = 99; // We'll go up to 90% during processing
         const totalSteps = estimateTime * 100; // Convert seconds to steps
         const stepSize = targetProgress / totalSteps;
         const stepInterval = 10; // Update every 10ms
@@ -85,6 +117,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (result.success) {
             content = `
                 <div class="result-item">
+                    <strong>File Name:${currentFileName}</strong> 
+                </div>
+                <div class="result-item">
                     <strong>${result.prediction}</strong> 
                 </div>
                 <div class="result-item">
@@ -112,10 +147,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle file selection
     fileInput.addEventListener('change', function() {
         if (this.files.length > 0) {
-            fileName.textContent = this.files[0].name;
+            currentFileName = this.files[0].name;
+            fileName.textContent = currentFileName;
             analysisButton.disabled = false;
             resultButton.style.display = 'none'; // Hide result button when new file is selected
         } else {
+            currentFileName = '';
             fileName.textContent = 'No file chosen';
             analysisButton.disabled = true;
             resultButton.style.display = 'none';
@@ -124,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle upload button click
     uploadButton.addEventListener('click', function() {
+        resetUI();
         fileInput.click();
     });
 
